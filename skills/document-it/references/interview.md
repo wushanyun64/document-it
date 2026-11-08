@@ -11,8 +11,9 @@ Run Phase 1 (discovery) first — anything the repo can answer, you answer yours
    document both as public."
 2. **Batch.** At most 4 questions per round, 1–3 rounds total. Most important first.
 3. **Offer defaults.** Every question gets a recommended option (listed first, marked
-   "Recommended") so the user can accept quickly. With `AskUserQuestion`, use 2–4 options;
-   the tool adds "Other" automatically.
+   "Recommended") so the user can accept quickly. Offer 2–4 options per question, and
+   always let the user answer freely. Structured-question tools (e.g. `AskUserQuestion` in Claude
+   Code) add an "Other" choice automatically; in plain chat, say "or tell me something else".
 4. **Ask about ambiguities with evidence.** Quote the file/symbol: "`src/foo/_compat.py` and
    `src/foo/legacy/` look internal — exclude from reference?"
 5. **Stop when it stops mattering.** If a remaining unknown wouldn't change the doc map, pick the
@@ -37,7 +38,7 @@ Run Phase 1 (discovery) first — anything the repo can answer, you answer yours
 | Publish to GitHub Pages? | Yes, via GitHub Actions · No, docs in repo only | Whether deploy workflow is added |
 | Versioned docs? | No, always latest (simplest; Zensical) · Yes, a version per release tag (fallback stack: ProperDocs + mike, since mike doesn't support Zensical yet) | Picks site generator and deploy template |
 | Custom domain? | No (`<user>.github.io/<repo>`) · Yes: ___ | CNAME + `site_url` |
-| How should docs keep up with code? | CI regenerates reference + checks drift, and Claude proposes doc PRs on source changes · CI regeneration + drift check only (no API key) · Manual only | Which workflows are added; AI needs `ANTHROPIC_API_KEY` and reads contributor-written code (prompt-injection surface, contained by the template; see `auto-update.md`). Recommend CI-only for repos that merge outside PRs without close review |
+| How should docs keep up with code? | CI regenerates reference + checks drift, and an AI agent proposes doc PRs on source changes · CI regeneration + drift check only (no API key) · Manual only | Which workflows are added; AI needs an API key secret (default agent: Claude Code Action, `ANTHROPIC_API_KEY`; ask if they prefer another agent) and reads contributor-written code (prompt-injection surface, contained by the template; see `auto-update.md`). Recommend CI-only for repos that merge outside PRs without close review |
 
 Note when relevant: Pages on **private** repos requires a paid GitHub plan; the published
 site is public unless on Enterprise Cloud with access control.

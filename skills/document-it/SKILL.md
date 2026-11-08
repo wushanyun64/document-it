@@ -1,6 +1,6 @@
 ---
 name: document-it
-description: 'Diátaxis documentation builder for code repositories. Interviews the user about audience and scope, analyzes the codebase, writes a clear Diátaxis doc set (tutorials, how-to guides, reference, explanation) with Mermaid and code-generated diagrams, scaffolds a Zensical site (the Material for MkDocs successor) published to GitHub Pages, and wires CI so docs regenerate and stay in sync with code changes (including optional Claude Code Action PRs). Use when asked to "document this repo/project/codebase", "write docs", "create documentation", "set up a docs site", "publish docs to GitHub Pages", "keep docs in sync with code", or to improve/restructure existing docs.'
+description: 'Diátaxis documentation builder for code repositories. Interviews the user about audience and scope, analyzes the codebase, writes a clear Diátaxis doc set (tutorials, how-to guides, reference, explanation) with Mermaid and code-generated diagrams, scaffolds a Zensical site (the Material for MkDocs successor) published to GitHub Pages, and wires CI so docs regenerate and stay in sync with code changes (including optional AI-agent doc PRs). Use when asked to "document this repo/project/codebase", "write docs", "create documentation", "set up a docs site", "publish docs to GitHub Pages", "keep docs in sync with code", or to improve/restructure existing docs.'
 license: MIT
 ---
 
@@ -51,9 +51,10 @@ and the main entry points. Follow `references/codebase-analysis.md` to build a d
 
 ### Phase 2 — Interview the user
 
-Ask only questions whose answers change the output, in batches of at most 4. Use the
-`AskUserQuestion` tool if available (put your recommended option first), otherwise a short
-numbered list with a suggested default for each. Question bank, defaults, and the
+Ask only questions whose answers change the output, in batches of at most 4, each with a
+recommended default listed first. Use your agent's structured-question tool if it has one
+(e.g. `AskUserQuestion` in Claude Code); otherwise ask a short numbered list in chat and wait
+for the answers. Question bank, defaults, and the
 "infer, don't ask" rules: `references/interview.md`.
 
 Must be settled before Phase 3:
@@ -61,7 +62,7 @@ Must be settled before Phase 3:
 - **Scope**: whole repo or specific packages; what to exclude (internal/private APIs)
 - **Quadrants & priority** (default: all four, tutorial + reference first)
 - **Publishing**: GitHub Pages? versioned docs? custom domain? public or private repo?
-- **Auto-update level**: CI regeneration only, or also AI-proposed doc PRs (needs an `ANTHROPIC_API_KEY` repo secret)
+- **Auto-update level**: CI regeneration only, or also AI-proposed doc PRs (needs an API key secret for the CI agent)
 - **Existing docs**: keep, migrate, or replace? Tone/branding constraints? Docs language?
 - **Ambiguities from Phase 1** (e.g. "two CLIs found — which is public?", "is `legacy/` still supported?")
 
@@ -113,11 +114,11 @@ Follow `references/visuals.md`:
 Follow `references/publishing.md` and `references/auto-update.md`. Copy into `.github/workflows/`:
 - `docs-deploy.yml` — clean strict build and deploy to Pages on push to the default branch (versioned docs: use `templates/mkdocs-legacy/docs-deploy-versioned.yml` instead).
 - `docs-check.yml` — on PRs: strict build, link check, doc example tests, drift warning.
-- `docs-ai-update.yml` — only if the user opted in: Claude Code Action proposes a docs PR when source changes land. The agent reads contributor-written text, so keep the template's hardening when customizing it: read-only agent job, path guard, PR opened by a separate non-agent job (`references/auto-update.md`, "Prompt-injection safety").
+- `docs-ai-update.yml` — only if the user opted in: a CI coding agent (default: Claude Code Action; swappable) proposes a docs PR when source changes land. The agent reads contributor-written text, so keep the template's hardening when customizing it: read-only agent job, path guard, PR opened by a separate non-agent job (`references/auto-update.md`, "Prompt-injection safety").
 - Copy `templates/tests/test_docs.py` → `tests/` if the project is Python and uses pytest.
 
 Then tell the user exactly which **manual steps** remain (Settings → Pages → Source = GitHub
-Actions; add `ANTHROPIC_API_KEY` secret; allow Actions to create PRs; add docs URL to the repo's About sidebar).
+Actions; add the CI agent's API key secret; allow Actions to create PRs; add docs URL to the repo's About sidebar).
 
 ### Phase 8 — Verify and report
 

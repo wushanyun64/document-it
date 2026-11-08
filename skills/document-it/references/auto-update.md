@@ -9,7 +9,7 @@ flowchart LR
     pr -->|merge| main[Default branch]
     main -->|docs-deploy.yml| build[Regenerate API pages<br/>+ diagrams, build]
     build --> pages[(GitHub Pages)]
-    main -->|docs-ai-update.yml<br/>src changed| claude[Claude Code Action]
+    main -->|docs-ai-update.yml<br/>src changed| claude[CI coding agent]
     claude -->|opens| docspr[Docs PR for review]
     docspr --> pr
 ```
@@ -45,9 +45,10 @@ Runs on PRs touching code or docs:
 
 ## Layer 3 — AI-proposed doc updates (`docs-ai-update.yml`)
 
-Uses `anthropics/claude-code-action` (v1). Trigger: push to the default branch with changes under
+Runs a coding agent in CI. The template uses `anthropics/claude-code-action` (v1) by default;
+see "Using a different agent" below to swap it. Trigger: push to the default branch with changes under
 source paths (configure the `paths:` filter). Two jobs:
-1. **`propose`** (read-only token, no git credentials, file-edit tools only). Claude reads
+1. **`propose`** (read-only token, no git credentials, file-edit tools only). The agent reads
    `docs/.doc-spec.yml`, diffs `before..after` of the push, maps changed code to affected pages
    (how-tos, tutorials, explanation, hand-written reference, Mermaid diagrams), edits only
    hand-written docs, runs `zensical build --clean --strict`, and writes a PR description. A
@@ -60,7 +61,7 @@ Never auto-merge; a human reviews the docs PR like any other.
 
 ### Prompt-injection safety
 
-The diff, docstrings, comments, and commit messages Claude reads may be authored by outside
+The diff, docstrings, comments, and commit messages the agent reads may be authored by outside
 contributors, so treat that text as untrusted (an indirect prompt-injection surface). The template
 contains it by design, and any customization must keep these properties:
 - **Trigger only on `push` to the default branch**, so only code a maintainer merged is read. Never
@@ -69,20 +70,36 @@ contains it by design, and any customization must keep these properties:
   `gh`, `curl`, or other network-capable tools in `--allowedTools`.
 - **A non-agent step enforces the blast radius**: only `docs/**` and `README.md` may change, and the
   only possible outcome is a PR a human reviews.
-- The prompt tells Claude that repository text is data, not instructions. This is defense in depth
+- The prompt tells the agent that repository text is data, not instructions. This is defense in depth
   only; the permission split above is what actually contains an injection.
 
 Tell the user about this surface when they opt into layer 3 (one sentence is enough), and offer
 layers 1–2 alone for repos that accept outside contributions without close review.
 
+### Using a different agent
+
+Only the agent step in the `propose` job is agent-specific; the guard step and the `open-pr` job
+work with any agent. To use another agent's GitHub Action (for example OpenAI Codex or Gemini CLI),
+replace that one step, translate the inputs using the action's own README, and keep the same prompt.
+The replacement must still satisfy the safety properties above:
+- runs in the read-only `propose` job (it may not need, or be given, a write token);
+- can edit files and run `git diff`/`git log`/`git show` and `zensical build`, but has no push,
+  `gh`, or network tools (use the action's sandbox or tool-allowlist setting);
+- writes its PR description to `.docs-pr-body.md` and doesn't commit;
+- has a turn or budget limit.
+
+If the user names an agent with no GitHub Action, offer layers 1–2 only, plus manual re-runs of this
+skill (below).
+
 Setup the user must do:
-- Add repo secret **`ANTHROPIC_API_KEY`** (Settings → Secrets and variables → Actions). Or run
-  `/install-github-app` in Claude Code, which installs the Claude GitHub App and sets the secret.
+- Add the agent's API key as a repo secret (Settings → Secrets and variables → Actions). Default
+  agent: **`ANTHROPIC_API_KEY`**; Claude Code users can instead run `/install-github-app`, which
+  installs the Claude GitHub App and sets the secret.
 - Settings → Actions → General → Workflow permissions: **Read and write** and
   **Allow GitHub Actions to create and approve pull requests**.
 - Note: PRs opened with the default `GITHUB_TOKEN` don't trigger other workflows (so
-  `docs-check.yml` won't run on them automatically). To get checks on the bot PRs, use the
-  Claude GitHub App token or a fine-grained PAT stored as a secret, or re-run checks manually.
+  `docs-check.yml` won't run on them automatically). To get checks on the bot PRs, use a
+  GitHub App token (e.g. the Claude GitHub App) or a fine-grained PAT stored as a secret, or re-run checks manually.
 
 Loop safety: the docs PR touches only `docs/**`, which is outside the trigger's `paths:`, so
 merging it doesn't re-trigger the workflow. Commits containing `[skip docs]` are ignored.

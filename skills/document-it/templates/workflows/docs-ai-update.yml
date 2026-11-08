@@ -1,10 +1,13 @@
-# When source code changes land on the default branch, Claude reviews the diff and proposes a PR
+# When source code changes land on the default branch, an AI coding agent reviews the diff and proposes a PR
 # that updates the hand-written docs (tutorials, how-tos, explanation, Mermaid diagrams).
-# Setup: add the ANTHROPIC_API_KEY repo secret (or run /install-github-app in Claude Code), and
-# Settings -> Actions -> General -> "Allow GitHub Actions to create and approve pull requests".
+# Default agent: Claude Code Action. To use another agent, replace only the marked step and keep its
+# restrictions (see the skill's references/auto-update.md, "Using a different agent").
+# Setup: add the agent's API key secret (default: ANTHROPIC_API_KEY, or run /install-github-app in
+# Claude Code), and enable Settings -> Actions -> General ->
+# "Allow GitHub Actions to create and approve pull requests".
 # Docs PRs only touch docs/**, which is outside the paths filter, so merging them can't loop.
 #
-# Prompt-injection hardening: the diff, docstrings, and commit messages Claude reads may be written
+# Prompt-injection hardening: the diff, docstrings, and commit messages the agent reads may be written
 # by outside contributors, so the agent is treated as untrusted:
 #   - The `propose` job has a read-only token, no stored git credentials, and file-edit tools only
 #     (no push, no gh, no network tools). It can only produce a patch.
@@ -45,6 +48,7 @@ jobs:
           python-version: "3.12"
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends graphviz
       - run: pip install -r requirements-docs.txt
+      # Agent step (swappable): file-edit tools only, no push/gh/network, read-only token.
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

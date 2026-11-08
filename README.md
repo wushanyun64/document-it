@@ -23,7 +23,7 @@ up CI so the docs keep up with the code.
   - Generated pages (API, diagrams, CLI help) rebuild on every deploy.
   - Pull requests are checked for broken links, broken code examples, and public API changes
     that weren't documented.
-  - Optionally, Claude opens a pull request that updates the hand-written pages when source
+  - Optionally, an AI agent in CI opens a pull request that updates the hand-written pages when source
     code changes.
 
 ## Install
@@ -34,16 +34,21 @@ With the [Skills CLI](https://skills.sh/):
 npx skills add wushanyun64/document-it
 ```
 
-Or copy the skill folder manually. For Claude Code:
+The CLI detects your agents and installs the skill for each of them (Claude Code, Codex, Cursor,
+GitHub Copilot, Gemini CLI, Cline, and others). Add `-g` to install it for all your projects
+instead of the current one.
+
+Or copy the skill folder into your agent's skills directory manually, for example:
 
 ```bash
 git clone https://github.com/wushanyun64/document-it.git
-cp -r document-it/skills/document-it ~/.claude/skills/             # all your projects
-# or: cp -r document-it/skills/document-it <repo>/.claude/skills/  # one project
+cp -r document-it/skills/document-it ~/.claude/skills/   # Claude Code, all projects
+cp -r document-it/skills/document-it <repo>/.agents/skills/  # agents that read .agents/skills
 ```
 
-It works with any agent that supports `SKILL.md` skills. In Claude Code you can also run it
-directly with `/document-it`.
+Check your agent's docs for its skills directory. The skill uses the open `SKILL.md` format and
+plain Python scripts, so it works with any agent that supports skills and can run shell commands.
+Some agents also expose it as a command (in Claude Code: `/document-it`).
 
 ## Usage
 
@@ -94,19 +99,21 @@ your-repo/
 └── .github/workflows/
     ├── docs-deploy.yml            # build + deploy to GitHub Pages
     ├── docs-check.yml             # PR checks
-    └── docs-ai-update.yml         # optional: Claude proposes doc PRs
+    └── docs-ai-update.yml         # optional: an AI agent proposes doc PRs
 ```
 
 After the skill finishes, you still need to do a few things yourself:
 
 - Set **Settings → Pages → Source** to **GitHub Actions**.
 - For AI doc updates only:
-  - Add an `ANTHROPIC_API_KEY` repository secret.
+  - Add the agent's API key as a repository secret (`ANTHROPIC_API_KEY` for the default,
+    Claude Code Action; the workflow documents how to swap in another agent).
   - Allow GitHub Actions to create pull requests.
 
 ## Requirements
 
-- **Your agent's environment:** Python 3.10+ and git.
+- **Your agent:** any agent that supports `SKILL.md` skills and can read files and run shell
+  commands. Its environment needs Python 3.10+ and git.
 - **Your project:** the docs are built with Zensical, installed from `requirements-docs.txt`.
 - **Optional:** [Graphviz](https://graphviz.org/) for SVG diagrams. Without it, the generated
   diagrams use Mermaid instead. The CI workflows install it automatically.
@@ -121,6 +128,8 @@ After the skill finishes, you still need to do a few things yourself:
 - **AI doc updates read contributor-written code.** The optional AI workflow is hardened against
   prompt injection: the agent job is read-only, a guard allows changes only under `docs/`, and a
   separate non-agent job opens a PR for human review. Skip it for repos with unreviewed outside contributions.
+- **Tested with Claude Code.** The skill avoids agent-specific features (questions fall back to plain
+  chat), but other agents haven't been tested yet. Reports are welcome.
 - **Publishing targets GitHub.** The workflows are GitHub Actions and the site is hosted on GitHub Pages.
 - **Built-in diagrams cover Python only.** The import graph and class hierarchy come from Python
   source. Other languages can plug in their own diagram tools.
