@@ -1,5 +1,7 @@
 # document-it
 
+[![skills.sh](https://skills.sh/b/wushanyun64/document-it)](https://skills.sh/wushanyun64/document-it)
+
 An agent skill that builds **clear, publishable documentation for a code repository** and keeps
 it in sync with the code.
 
@@ -116,6 +118,9 @@ After the skill finishes, you still need to do a few things yourself:
 - **Versioned docs don't use Zensical.** The versioning tool (`mike`) doesn't support Zensical yet,
   so versioned docs use a fallback stack: ProperDocs, Material for MkDocs, and mike. Material is
   in maintenance mode, and the skill tells you about this trade-off when you choose versioned docs.
+- **AI doc updates read contributor-written code.** The optional AI workflow is hardened against
+  prompt injection: the agent job is read-only, a guard allows changes only under `docs/`, and a
+  separate non-agent job opens a PR for human review. Skip it for repos with unreviewed outside contributions.
 - **Publishing targets GitHub.** The workflows are GitHub Actions and the site is hosted on GitHub Pages.
 - **Built-in diagrams cover Python only.** The import graph and class hierarchy come from Python
   source. Other languages can plug in their own diagram tools.

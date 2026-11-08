@@ -37,7 +37,7 @@ Run Phase 1 (discovery) first — anything the repo can answer, you answer yours
 | Publish to GitHub Pages? | Yes, via GitHub Actions · No, docs in repo only | Whether deploy workflow is added |
 | Versioned docs? | No, always latest (simplest; Zensical) · Yes, a version per release tag (fallback stack: ProperDocs + mike, since mike doesn't support Zensical yet) | Picks site generator and deploy template |
 | Custom domain? | No (`<user>.github.io/<repo>`) · Yes: ___ | CNAME + `site_url` |
-| How should docs keep up with code? | CI regenerates reference + checks drift, and Claude proposes doc PRs on source changes · CI regeneration + drift check only (no API key) · Manual only | Which workflows are added; AI needs `ANTHROPIC_API_KEY` |
+| How should docs keep up with code? | CI regenerates reference + checks drift, and Claude proposes doc PRs on source changes · CI regeneration + drift check only (no API key) · Manual only | Which workflows are added; AI needs `ANTHROPIC_API_KEY` and reads contributor-written code (prompt-injection surface, contained by the template; see `auto-update.md`). Recommend CI-only for repos that merge outside PRs without close review |
 
 Note when relevant: Pages on **private** repos requires a paid GitHub plan; the published
 site is public unless on Enterprise Cloud with access control.

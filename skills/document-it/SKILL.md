@@ -113,7 +113,7 @@ Follow `references/visuals.md`:
 Follow `references/publishing.md` and `references/auto-update.md`. Copy into `.github/workflows/`:
 - `docs-deploy.yml` — clean strict build and deploy to Pages on push to the default branch (versioned docs: use `templates/mkdocs-legacy/docs-deploy-versioned.yml` instead).
 - `docs-check.yml` — on PRs: strict build, link check, doc example tests, drift warning.
-- `docs-ai-update.yml` — only if the user opted in: Claude Code Action proposes a docs PR when source changes land.
+- `docs-ai-update.yml` — only if the user opted in: Claude Code Action proposes a docs PR when source changes land. The agent reads contributor-written text, so keep the template's hardening when customizing it: read-only agent job, path guard, PR opened by a separate non-agent job (`references/auto-update.md`, "Prompt-injection safety").
 - Copy `templates/tests/test_docs.py` → `tests/` if the project is Python and uses pytest.
 
 Then tell the user exactly which **manual steps** remain (Settings → Pages → Source = GitHub
