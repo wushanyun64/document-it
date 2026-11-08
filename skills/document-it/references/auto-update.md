@@ -1,0 +1,78 @@
+# Keeping docs in sync with the code
+
+Three layers, from fully deterministic to AI-assisted. Layers 1–2 always; layer 3 if the user opted in.
+
+```mermaid
+flowchart LR
+    pr[Pull request] -->|docs-check.yml| guard{Strict build,<br/>links, examples,<br/>drift check}
+    guard -->|warn / fail| pr
+    pr -->|merge| main[Default branch]
+    main -->|docs-deploy.yml| build[Regenerate API pages<br/>+ diagrams, build]
+    build --> pages[(GitHub Pages)]
+    main -->|docs-ai-update.yml<br/>src changed| claude[Claude Code Action]
+    claude -->|opens| docspr[Docs PR for review]
+    docspr --> pr
+```
+*Generated content updates on every deploy with no human input; prose is updated through reviewed PRs.*
+
+## Layer 1 — Regenerate on every build (deterministic)
+
+What stays in sync automatically because it's produced from code at build time:
+- **API reference** — api-autonav + mkdocstrings read the current source and docstrings.
+- **Diagrams** — `docs/reference/diagrams.md` runs `gen_diagrams.py` (markdown-exec) to re-derive the import graph and class hierarchy.
+- **Included examples** — `--8<--` snippets pull current file contents.
+- **CLI reference** — markdown-exec blocks capture the current `--help` output (if set up).
+
+`docs-deploy.yml` runs a clean build on every push to the default branch, so the live site always
+matches it. Nothing generated is committed, so there's nothing to forget to regenerate.
+
+## Layer 2 — Guard pull requests (`docs-check.yml`)
+
+Runs on PRs touching code or docs:
+1. `zensical build --clean --strict` — fails on broken internal links/anchors, missing snippet files,
+   cross-references to renamed/removed objects (e.g. `[Client.fetch][mypkg.Client.fetch]`
+   cross-refs), and nav entries pointing nowhere. `--clean` matters: it bypasses Zensical's page cache so
+   code-generated pages are re-run.
+2. **Link check** (`lychee`) on Markdown — catches dead external links.
+3. **Doc example tests** — `pytest tests/test_docs.py` runs every ```` ```python ```` block in
+   `docs/` and the README (`mktestdocs`); `pytest --doctest-modules` runs docstring examples.
+4. **Drift check** — `tools/docs/check_drift.py --base origin/<base>`:
+   - Lists source files changed without any docs change → GitHub warning annotation.
+   - If `griffe` is installed, diffs the **public API** against the base and lists breaking
+     changes (removed/renamed symbols, changed signatures) → these almost always need docs edits.
+   - `--strict` makes it exit non-zero; the template uses warnings only (`continue-on-error`)
+     and lets a `docs-not-needed` PR label silence it.
+
+## Layer 3 — AI-proposed doc updates (`docs-ai-update.yml`)
+
+Uses `anthropics/claude-code-action` (v1). Trigger: push to the default branch with changes under
+source paths (configure the `paths:` filter). Claude:
+1. Reads `docs/.doc-spec.yml` (audience, tone, conventions, scope).
+2. Diffs `before..after` of the push, maps changed code to affected pages (how-tos, tutorials,
+   explanation, hand-written reference, Mermaid diagrams).
+3. Edits only hand-written docs (never generated ones), runs `zensical build --clean --strict`.
+4. Commits on a `docs/auto-update-<sha>` branch and opens a PR with a summary of what changed and why. If nothing needs updating, it does nothing.
+
+Never auto-merge; a human reviews the docs PR like any other.
+
+Setup the user must do:
+- Add repo secret **`ANTHROPIC_API_KEY`** (Settings → Secrets and variables → Actions). Or run
+  `/install-github-app` in Claude Code, which installs the Claude GitHub App and sets the secret.
+- Settings → Actions → General → Workflow permissions: **Read and write** and
+  **Allow GitHub Actions to create and approve pull requests**.
+- Note: PRs opened with the default `GITHUB_TOKEN` don't trigger other workflows (so
+  `docs-check.yml` won't run on them automatically). To get checks on the bot PRs, use the
+  Claude GitHub App token or a fine-grained PAT stored as a secret, or re-run checks manually.
+
+Loop safety: the docs PR touches only `docs/**`, which is outside the trigger's `paths:`, so
+merging it doesn't re-trigger the workflow. Commits containing `[skip docs]` are ignored.
+
+Cost control: the `paths:` filter, `concurrency` group (one run at a time; newer pushes cancel
+older), and `--max-turns` keep runs bounded. Check the action README for current input names
+if the action has a newer major version.
+
+## Re-running this skill manually
+
+Instead of (or in addition to) layer 3, the user can re-invoke the skill locally:
+"update the docs for the changes since the last release". Follow the "Updating existing docs"
+section of SKILL.md.

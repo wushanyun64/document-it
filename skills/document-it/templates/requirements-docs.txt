@@ -1,0 +1,7 @@
+# Documentation toolchain (document-it skill). Pinned for reproducible builds; bump deliberately.
+zensical==0.1.0
+mkdocstrings==1.0.8
+mkdocstrings-python==2.0.10
+markdown-exec==1.12.6  # build-time generated diagrams page
+griffe==2.4.1          # API drift check (tools/docs/check_drift.py)
+mktestdocs==0.2.5      # only needed for tests/test_docs.py

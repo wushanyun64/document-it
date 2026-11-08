@@ -1,0 +1,11 @@
+# Versioned-docs toolchain (document-it skill): ProperDocs (MkDocs 1.x continuation) + mike.
+# Used only when versioned docs are required, because mike doesn't support Zensical yet.
+properdocs==1.6.7
+mkdocs-material==9.8.1
+mkdocstrings==1.0.8
+mkdocstrings-python==2.0.10
+mkdocs-api-autonav==0.4.0
+markdown-exec==1.12.6
+mike==2.2.0
+griffe==2.4.1
+mktestdocs==0.2.5
