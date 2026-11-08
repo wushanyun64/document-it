@@ -1,6 +1,6 @@
 # document-it
 
-[![skills.sh](https://skills.sh/b/wushanyun64/document-it)](https://skills.sh/wushanyun64/document-it)
+[![skills.sh](https://img.shields.io/badge/skills.sh-document--it-000000)](https://skills.sh/wushanyun64/document-it/document-it)
 
 An agent skill that builds **clear, publishable documentation for a code repository** and keeps
 it in sync with the code.
