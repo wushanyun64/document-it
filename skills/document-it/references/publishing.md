@@ -12,6 +12,9 @@ One-time manual setup (tell the user):
 1. Repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 2. Push to the default branch; the site appears at `https://<owner>.github.io/<repo>/`.
 3. Make sure `site_url` in `zensical.toml` is that URL (canonical links, sitemap, 404 page).
+4. Until that first deploy, the site URL returns 404. If the README or docs link to it, the
+   first PR's `docs-check` link check fails; add `--exclude '^<site_url>'` to the lychee `args`
+   in `docs-check.yml`, or deploy once from the default branch before opening PRs.
 
 ## Option B — Versioned docs (fallback stack)
 

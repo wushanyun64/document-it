@@ -34,10 +34,17 @@ jobs:
           pip install -e . pytest
           pytest tests/test_docs.py
 
+      # Web links only: internal links are checked by the strict build above, and links to generated
+      # pages (e.g. docs/reference/api/) would look like missing files to lychee, which reads raw Markdown.
+      # Until the first deploy, the site's own Pages URL 404s; add --exclude '^<site_url>' if the README links it.
       - name: Check external links
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --no-progress --accept 200,206,429 --exclude-path site './docs/**/*.md' README.md
+          args: >-
+            --no-progress --accept 200,206,429
+            --scheme https --scheme http
+            --exclude-path site
+            './docs/**/*.md' README.md
           fail: true
 
       - name: Docs drift check

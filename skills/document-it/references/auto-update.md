@@ -33,7 +33,9 @@ Runs on PRs touching code or docs:
    cross-references to renamed/removed objects (e.g. `[Client.fetch][mypkg.Client.fetch]`
    cross-refs), and nav entries pointing nowhere. `--clean` matters: it bypasses Zensical's page cache so
    code-generated pages are re-run.
-2. **Link check** (`lychee`) on Markdown — catches dead external links.
+2. **Link check** (`lychee`) on Markdown — catches dead external links. It's limited to
+   `--scheme https --scheme http`: lychee reads raw Markdown, so relative links to pages generated at
+   build time (`reference/api/…`) would fail as missing files. Internal links are step 1's job.
 3. **Doc example tests** — `pytest tests/test_docs.py` runs every ```` ```python ```` block in
    `docs/` and the README (`mktestdocs`); `pytest --doctest-modules` runs docstring examples.
 4. **Drift check** — `tools/docs/check_drift.py --base origin/<base>`:
