@@ -10,6 +10,8 @@ about readers and scope, analyzes the codebase, and writes a structured doc set 
 It then publishes the docs as a [Zensical](https://zensical.org/) site on GitHub Pages and sets
 up CI so the docs keep up with the code.
 
+[![Pages from the weatherkit example site: home, tutorial, architecture diagram, and generated API reference](assets/demo-strip.png)](https://wushanyun64.github.io/weatherkit/)
+
 ## What you get
 
 - **A structured doc set** that follows [Diátaxis](https://diataxis.fr/): tutorials,
@@ -25,6 +27,23 @@ up CI so the docs keep up with the code.
     that weren't documented.
   - Optionally, an AI agent in CI opens a pull request that updates the hand-written pages when source
     code changes.
+
+## Live example
+
+[**weatherkit**](https://wushanyun64.github.io/weatherkit/) is a small demo package documented with this skill
+([source](https://github.com/wushanyun64/weatherkit)).
+
+[![A tour of the weatherkit docs: tutorial, how-to guide, architecture diagram, API reference, CLI reference, generated diagrams, and dark mode](assets/demo-tour.gif)](https://wushanyun64.github.io/weatherkit/)
+
+| What to look at | Page |
+|---|---|
+| Tutorial: a guided first success | [Getting started](https://wushanyun64.github.io/weatherkit/tutorials/getting-started/) |
+| How-to guides: one task each | [Use a custom provider](https://wushanyun64.github.io/weatherkit/how-to/custom-provider/) · [Test with providers](https://wushanyun64.github.io/weatherkit/how-to/test-with-providers/) |
+| Explanation with a Mermaid architecture diagram | [Architecture](https://wushanyun64.github.io/weatherkit/explanation/architecture/) |
+| API reference generated from docstrings | [weatherkit API](https://wushanyun64.github.io/weatherkit/reference/api/weatherkit/) |
+| CLI reference captured from `--help` at build time | [CLI](https://wushanyun64.github.io/weatherkit/reference/cli/) |
+| Import graph and class hierarchy generated from the code | [Diagrams](https://wushanyun64.github.io/weatherkit/reference/diagrams/) |
+| Config, workflows, and the interview record (`docs/.doc-spec.yml`) | [Repository](https://github.com/wushanyun64/weatherkit) |
 
 ## Install
 
