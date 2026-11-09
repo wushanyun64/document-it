@@ -116,6 +116,7 @@ Follow `references/publishing.md` and `references/auto-update.md`. Copy into `.g
 - `docs-check.yml` — on PRs: strict build, link check, doc example tests, drift warning.
 - `docs-ai-update.yml` — only if the user opted in: a CI coding agent (default: Claude Code Action; swappable) proposes a docs PR when source changes land. The agent reads contributor-written text, so keep the template's hardening when customizing it: read-only agent job, path guard, PR opened by a separate non-agent job (`references/auto-update.md`, "Prompt-injection safety").
 - Copy `templates/tests/test_docs.py` → `tests/` if the project is Python and uses pytest.
+- If any page runs project code at build time (e.g. the CLI `--help` page), uncomment the `pip install -e .` line in each workflow's install step. Otherwise the build passes locally but fails in CI.
 
 Then tell the user exactly which **manual steps** remain (Settings → Pages → Source = GitHub
 Actions; add the CI agent's API key secret; allow Actions to create PRs; add docs URL to the repo's About sidebar).

@@ -29,7 +29,9 @@ jobs:
       - name: Install Graphviz (SVG diagrams; without it the diagrams page falls back to Mermaid)
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends graphviz
       - name: Install docs dependencies
-        run: pip install -r requirements-docs.txt
+        run: |
+          pip install -r requirements-docs.txt
+          # pip install -e .  # uncomment if a page runs project code at build time (e.g. CLI --help)
       - uses: actions/configure-pages@v6
       - name: Build site (regenerates API reference and diagrams)
         run: zensical build --clean --strict

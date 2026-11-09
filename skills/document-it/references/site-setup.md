@@ -103,7 +103,7 @@ With Graphviz `dot` on PATH, diagrams are inline SVG; otherwise Mermaid.
 ## CLI reference
 
 Any CLI — capture `--help` at build time (the package must be installed in the docs
-environment, so add `pip install -e .` to the workflows' install step):
+environment, so uncomment the `pip install -e .` line in each workflow's install step):
 
 ````markdown
 ```bash exec="on" result="text"
